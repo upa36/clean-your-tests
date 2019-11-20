@@ -20,14 +20,7 @@ describe('pricing', () => {
       expect(formattedPrice).to.equal(15.15)
     })
   })
-  it('returns the price for a commuter product for an employee using train', () => {
 
-    const selectedOptions = { benefit: 'train' }
-
-    const price = pricing.calculateProductPrice(products.commuter, selectedOptions)
-
-    expect(price).to.equal(9.75)
-  })
 
   describe('getEmployerContribution', () => {
     it('returns the amount  from long term disability plan contributed by employer in dollars', () => {
@@ -73,11 +66,29 @@ describe('calculateLTDprice', () => {
     expect(price).to.equal(32.04)
   })
 })
+describe('calculateCommuterPrice', () => {
+  it('returns price of package based on type of commute', () => {
 
+    const selectedOptions = { benefit: 'train' }
+
+    const price = pricing.calculateCommuterPrice(products.commuter, selectedOptions)
+
+    expect(price).to.equal(84.75)
+
+  })
+
+  it('returns the commuter price for an employee using parking', () => {
+    const selectedOptions = { benefit: 'parking' }
+
+    const price = pricing.calculateCommuterPrice(products.commuter, selectedOptions)
+
+    expect(price).to.equal(250)
+
+  })
+})
 
 describe('calculateProductPrice', () => {
-
-  let sandbox, calculateVolLifePriceSpy, getEmployerContributionSpy, formatPriceSpy, calculateLTDPriceSpy
+  let sandbox, calculateVolLifePriceSpy, getEmployerContributionSpy, formatPriceSpy, calculateLTDPriceSpy, calculateCommuterPriceSpy
 
   beforeEach(() => {
     sandbox = sinon.createSandbox()
@@ -85,16 +96,14 @@ describe('calculateProductPrice', () => {
     calculateLTDPriceSpy = sandbox.spy(pricing, 'calculateLTDPrice')
     getEmployerContributionSpy = sandbox.spy(pricing, 'getEmployerContribution')
     formatPriceSpy = sandbox.spy(pricing, 'formatPrice')
+    calculateCommuterPriceSpy = sandbox.spy(pricing, 'calculateCommuterPrice')
   })
 
   afterEach(() => {
     sandbox.restore()
   })
 
-
   it('returns the price for a voluntary life product for a single employee', () => {
-
-
     const selectedOptions = {
       familyMembersToCover: ['ee'],
       coverageLevel: [{ role: 'ee', coverage: 125000 }],
@@ -106,6 +115,7 @@ describe('calculateProductPrice', () => {
     expect(getEmployerContributionSpy).to.have.callCount(1)
     expect(formatPriceSpy).to.have.callCount(1)
     expect(calculateLTDPriceSpy).to.have.callCount(0)
+    expect(calculateCommuterPriceSpy).to.have.callCount(0)
   })
 
   it('returns the price for a voluntary life product for an employee with a spouse', () => {
@@ -123,6 +133,7 @@ describe('calculateProductPrice', () => {
     expect(getEmployerContributionSpy).to.have.callCount(1)
     expect(formatPriceSpy).to.have.callCount(1)
     expect(calculateLTDPriceSpy).to.have.callCount(0)
+    expect(calculateCommuterPriceSpy).to.have.callCount(0)
   })
 
   it('returns the price for a disability product for an employee', () => {
@@ -133,20 +144,29 @@ describe('calculateProductPrice', () => {
 
     expect(price).to.equal(22.04)
   })
+  it('returns price of package based on type of commute', () => {
 
+    const selectedOptions = { benefit: 'train' }
+
+    const price = pricing.calculateCommuterPrice(products.commuter, selectedOptions)
+
+    expect(price).to.equal(84.75)
+    expect(calculateCommuterPriceSpy).to.have.callCount(1)
+
+  })
+
+  it('returns the commuter price for an employee using parking', () => {
+    const selectedOptions = { benefit: 'parking' }
+
+    const price = pricing.calculateCommuterPrice(products.commuter, selectedOptions)
+
+    expect(price).to.equal(250)
+    expect(calculateCommuterPriceSpy).to.have.callCount(1)
+
+  })
   it('throws an error on unknown product type', () => {
     const unknownProduct = { type: 'vision' }
 
     expect(() => pricing.calculateProductPrice(unknownProduct, {}, {})).to.throw('Unknown product type: vision')
-  })
-})
-describe('calculateCommuterPrice', () => {
-  it('returns price of package based on type of commute', () => {
-
-    const selectedOptions = { type: 'train' }
-
-    const result = pricing.calculateCommuterPrice(products.commuter, selectedOptions)
-
-    expect(result).to.equal(84.75)
   })
 })
