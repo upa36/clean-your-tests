@@ -20,6 +20,15 @@ describe('pricing', () => {
       expect(formattedPrice).to.equal(15.15)
     })
   })
+  it('returns the price for a commuter product for an employee using train', () => {
+
+    const selectedOptions = { benefit: 'train' }
+
+    const price = pricing.calculateProductPrice(products.commuter, selectedOptions)
+
+    expect(price).to.equal(9.75)
+  })
+
   describe('getEmployerContribution', () => {
     it('returns the amount  from long term disability plan contributed by employer in dollars', () => {
       const dollarAmount = 50
@@ -82,6 +91,7 @@ describe('calculateProductPrice', () => {
     sandbox.restore()
   })
 
+
   it('returns the price for a voluntary life product for a single employee', () => {
 
 
@@ -95,6 +105,7 @@ describe('calculateProductPrice', () => {
     expect(calculateVolLifePriceSpy).to.have.callCount(1)
     expect(getEmployerContributionSpy).to.have.callCount(1)
     expect(formatPriceSpy).to.have.callCount(1)
+    expect(calculateLTDPriceSpy).to.have.callCount(0)
   })
 
   it('returns the price for a voluntary life product for an employee with a spouse', () => {
@@ -111,6 +122,7 @@ describe('calculateProductPrice', () => {
     expect(calculateVolLifePriceSpy).to.have.callCount(1)
     expect(getEmployerContributionSpy).to.have.callCount(1)
     expect(formatPriceSpy).to.have.callCount(1)
+    expect(calculateLTDPriceSpy).to.have.callCount(0)
   })
 
   it('returns the price for a disability product for an employee', () => {
@@ -126,5 +138,15 @@ describe('calculateProductPrice', () => {
     const unknownProduct = { type: 'vision' }
 
     expect(() => pricing.calculateProductPrice(unknownProduct, {}, {})).to.throw('Unknown product type: vision')
+  })
+})
+describe('calculateCommuterPrice', () => {
+  it('returns price of package based on type of commute', () => {
+
+    const selectedOptions = { type: 'train' }
+
+    const result = pricing.calculateCommuterPrice(products.commuter, selectedOptions)
+
+    expect(result).to.equal(84.75)
   })
 })
